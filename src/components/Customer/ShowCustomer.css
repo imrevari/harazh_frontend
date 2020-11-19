@@ -1,0 +1,19 @@
+.cust{
+
+    /* border: 1px solid #018dc4; */
+    background-color: beige;
+    width: 80%;
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.left{
+    width: 50%;
+    
+}
+
+.right{
+    width: 50%;
+    
+}

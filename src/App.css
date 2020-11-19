@@ -1,0 +1,249 @@
+.App {
+  text-align: center;
+}
+
+.page_content {
+  padding-top: 50px;
+}
+
+.navbar-container {
+  width: 80%;
+  text-align: center;
+}
+
+table {
+  width: 100%;
+}
+
+.try-border{
+  border: 1px solid #018dc4;
+  display: flex;
+  vertical-align: middle;
+  width: 100%;
+}
+
+.enjoy-css {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  cursor: pointer;
+  margin: 6px 30px 6px 6px;
+  padding: 10px 20px;
+  border: 1px solid #018dc4;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  font: normal 16px/normal "Times New Roman", Times, serif;
+  color: rgba(255,255,255,0.9);
+  -o-text-overflow: clip;
+  text-overflow: clip;
+  background: #0199d9;
+  -webkit-box-shadow: 0 0 6px 2px rgba(0,0,0,0.5) , 3px 2px 2px 0 rgba(124,34,34,0.2) ;
+  box-shadow: 0 0 6px 2px rgba(0,0,0,0.5) , 3px 2px 2px 0 rgba(124,34,34,0.2) ;
+  text-shadow: -1px -1px 0 rgba(15,73,168,0.66) ;
+  -webkit-transition: all 300ms cubic-bezier(0.42, 0, 0.58, 1);
+  -moz-transition: all 300ms cubic-bezier(0.42, 0, 0.58, 1);
+  -o-transition: all 300ms cubic-bezier(0.42, 0, 0.58, 1);
+  transition: all 300ms cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+.table-container {
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.nav-link {
+  display: inline-block;
+  margin: 3px 3px 3px 3px;
+
+}
+
+.main-menu-btn{
+  margin: 6px 30px 6px 6px;
+  padding: 10px 20px;
+}
+
+
+
+.input-label {
+  display: inline-block;
+  width: 35%;
+  text-align: right;
+  padding-right: 15px;
+  height: 2.5em;
+}
+
+.my-textarea{
+  width: 65%;
+  height: 5em;
+}
+
+.textarea-lable{
+  display: inline-block;
+  width: 35%;
+  text-align: right;
+  padding-right: 5px;
+  padding-top: 15px;
+  padding-bottom: 10px;
+  padding-left: 5px;
+  height: 2.5em;
+  vertical-align: top;
+
+}
+
+.label-2{
+  display: inline-block;
+  width: 30%;
+  text-align: center;
+  padding-right: 5px;
+  padding-top: 15px;
+  padding-bottom: 10px;
+  padding-left: 5px;
+  height: 2.5em;
+  vertical-align: top;
+}
+
+.label-for-buttons{
+  display: inline-block;
+  width: 30%;
+  text-align: center;
+  padding-right: 5px;
+  padding-top: 15px;
+  padding-bottom: 10px;
+  padding-left: 5px;
+  height: 2.5em;
+}
+
+.button-for-new-order{
+  display: inline-block ;
+  width: 30%;
+  align-self: right;
+  margin: 1%;
+  margin-right: 5%;
+  height: 50px; 
+}
+
+.login-block{
+  display: flex;
+  vertical-align: middle;
+}
+
+.my-input-login-field {
+  display: inline-block;
+  width: 50%;
+  padding-left: 5px;
+  border-radius: 4px;
+  border: solid 1px #bbb;
+  height: 2.5em;
+  color: #75757a;
+}
+
+.new-order-button{
+  display: inline-block;
+}
+
+.my-input-field {
+  display: inline-block;
+  width: 65%;
+  padding-left: 5px;
+  border-radius: 4px;
+  border: solid 1px #bbb;
+  height: 2.5em;
+  color: #75757a;
+}
+
+
+
+.my-input-search-field {
+  display: inline-block;
+  width: 40%;
+  padding-left: 5px;
+  border-radius: 4px;
+  border: solid 1px #bbb;
+  height: 2.5em;
+  color: #75757a;
+}
+
+.my-input-search-field-2 {
+  display: inline-block;
+  width: 40%;
+  padding-left: 5px;
+  margin-right: 2.5%;
+  border-radius: 4px;
+  border: solid 1px #bbb;
+  height: 2.5em;
+  color: #75757a;
+  
+}
+
+.my-input-search-field-3 {
+  display: inline-block;
+  width: 25%;
+  padding-left: 5px;
+  border-radius: 4px;
+  border: solid 1px #bbb;
+  height: 2.5em;
+  color: #75757a;
+}
+
+.my-input-search-field-4 {
+  display: inline-block;
+  width: 25%;
+  padding-left: 5px;
+  margin-right: 2.5%;
+  border-radius: 4px;
+  border: solid 1px #bbb;
+  height: 2.5em;
+  color: #75757a;
+  
+}
+
+.input-search-label {
+  display: inline-block;
+  width: 35%;
+  text-align: right;
+  padding-right: 15px;
+  height: 2.5em;
+}
+
+.my-input-paginator-field {
+  display: inline-block;
+  width: 10%;
+  padding-left: 5px;
+  border-radius: 4px;
+  border: solid 1px #bbb;
+  height: 2.5em;
+  color: #75757a;
+  text-align: center
+}
+
+.form-text {
+  margin-top: -10px;
+  margin-bottom: 10px;
+  width: 115%;
+}
+
+.invalid-label {
+  color: #F04124
+}
+
+ul {
+  list-style-type: none;
+}
+
+.my-button {
+  min-width: 160px;
+  margin: 6px 30px 6px 6px;
+  padding: 10px 20px;
+}
+
+.notification-container {
+  top: 50px;
+}
+
+.my-input-block{
+  margin: 0px 0px 0px 0px;
+}
+
+.toHide{
+  display: none;
+}

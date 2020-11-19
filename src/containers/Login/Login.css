@@ -1,0 +1,9 @@
+.category-saved {
+    font-size: 0.8em;
+    text-align: center;
+    width: 100%;
+}
+
+.is-saved {
+    border: 3px solid lightgreen;
+}

@@ -1,0 +1,44 @@
+.date {
+    text-align: left;
+    padding-right: 15px;
+    height: 2em;
+}
+
+
+.tt1 {
+    display: inline-block;
+    align-self: left;
+    padding-right: 15px;
+    height: 2.5em;
+}
+
+.open {
+    background-color: greenyellow;
+    padding-right: 15px;
+    padding-left: 15px;
+    height: 1.5em;
+}
+
+.closed {
+    background-color: rgb(221, 21, 64);
+    padding-right: 15px;
+    padding-left: 15px;
+    height: 1.5em;
+}
+
+.for-div{
+    display: flex;
+    vertical-align: middle;
+    width: 100%;
+}
+
+.text{
+    display: inline-block;
+    width: 30%;
+    text-align: center;
+    padding-right: 5px;
+    padding-top: 15px;
+    padding-bottom: 10px;
+    padding-left: 5px;
+    height: 2.5em;
+}
