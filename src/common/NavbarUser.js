@@ -5,7 +5,7 @@ const navbarUser = (props) =>(
 
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <div className="container">
-            <Link className="navbar-brand" to="/">ГАРАЖ </Link>
+            <Link className="navbar-brand" to="/">ГАРАЖ - ПОМІЧНИК</Link>
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor03"
                     aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
@@ -15,14 +15,14 @@ const navbarUser = (props) =>(
                 <ul className="navbar-nav mr-auto">
                     <li className="nav-item">
                         <Link className="nav-link" to="/mainPage">Закази</Link>
-                        <Link className="nav-link" to="/">Моii зроболенi роботи</Link>
+                        <Link className="nav-link" to="/myWorks">Мої зроболенi роботи</Link>
                         <Link className="nav-link" to="/logout">Вийти</Link>
                     </li>
 
                 </ul>
 
                 <ul className="navbar-nav ml-auto">
-                    <li><Link className="nav-link" to="/myPage"><i className="fas fa-shopping-cart"></i> Моii даннi - {props.user}</Link></li>
+                    <li><Link className="nav-link" to="/myPage"><i className="fas fa-shopping-cart"></i> Мої даннi - {props.user}</Link></li>
                 </ul>
             </div>
         </div>

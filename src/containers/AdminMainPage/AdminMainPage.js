@@ -1,119 +1,51 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
-import axios from 'axios';
-import ListOrderComponentDetailed from '../../components/ListOrderComponent/ListOrderComponentDetailed';
 
 class AdminMainPage extends Component {
     constructor(props) {
         super(props);
         document.title = 'Home';
     }
-
-    state = {
-
-
-        incoming: []
-
-       
-    };
-
-    getLastTenOrders = () =>{
-        axios.get('/orders/')
-                    .then((response) => {
-                        // console.log(response.data)
-                        this.setState({incoming: response.data});
-                    })
-                    .catch(error => {
-                        this.setState(() => {
-                            throw error;
-                        })
-                    })
-
-
-
-    }
-
-    totalToPay = (works, partCounts, amountPayedInAdvance) =>{
-        let total = 0;
-        total -= amountPayedInAdvance;
-
-        works.map(item =>{
-            if (item.workDone){
-                total += item.price;
-            }
-            return total;
-        })
-        partCounts.map(item =>{
-                total += (item.retailPrice * item.amount);
-                return total;      
-        })
-        
-       return total;
-    }
-
-    openOrder = (id) =>{
-        this.props.history.push("/order/" + id);
-    }
-
-
-    componentDidMount(){
-
-        this.getLastTenOrders();
-
-    }
-
+   
     render(){
-
-        const listOfOrders = this.state.incoming.map( item => {
-
-            return (
-                <ListOrderComponentDetailed 
-                    key={item.id}
-                    id={item.id}
-                    opened={item.orderOpened}
-                    details={() => this.openOrder(item.id)}
-                    total={this.totalToPay(item.works, item.partCounts, item.amountPayedInAdvance)}
-                    car={item.car.carMade}
-                    name={item.customer.firstName + ' ' + item.customer.lastName }
-                    
-                />
-            )
-        });
-
-        const myTable = ( 
-            
-                <table border="1" >
-                    <thead>
-                        <tr>
-                            <th className=""  >Номер </th>
-                            <th className=""  >Машина </th>
-                            <th className=""  >Клiент </th>
-                            <th className=""  >Одкритий </th>
-                            <th className=""  >Довг </th>
-                            {/* <th className="" >Деталi</th> */}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {listOfOrders} 
-                    </tbody>
-                </table>
-            
-
-        );
-
-
+        const user = JSON.parse(localStorage.getItem('user'));
+        const vityaCondition = ((user.name === 'Oleksandr') && (new Date().toISOString().split('T')[0] === '2021-05-20'))
+        //const vityaCondition = ((user.name === 'pista') && (new Date().toISOString().split('T')[0] === '2021-05-10'))
         return (
             <div>
-                <h1>Главне меню адмiна</h1>
+                <h1>Головне меню {user.role === 'ROLE_ADMIN' ? 'адмiна' : 'майстра'}</h1>
 
                 <hr/>
              
                     <div  >                              
                         
-                        <Link to="/newOrder">
-                            <button className=" btn-success my-button">Створити заказ</button>
+                        <Link to="/test">
+                            <button className="btn-success my-button">Створити заказ</button>
+                        </Link>
+                        <Link to="/openedOrders">
+                            <button className="btn-danger my-button">Закази в роботі</button>
                         </Link>
 
+                        {/* <Link to="/"> */}
+                            <button className="btn-info my-button" onClick={() => alert('Функція ще не робит')}>Старі закази</button>
+                        {/* </Link> */}
+
+                    </div>
+                    <br/>
+                    <div style={vityaCondition ? {display: 'none'} : {}}>
+                        <img 
+                        src={"https://st2.depositphotos.com/3682225/11228/v/600/depositphotos_112288198-stock-illustration-automotive-repair-icon-car-service.jpg"} 
+                        width={'80%'}
+                        height={'auto'}
+                        />
+                    </div>
+
+                    <div style={vityaCondition ? {} : {display: 'none'}}>
+                        <img 
+                        src={"https://cdn.shopify.com/s/files/1/0065/4917/6438/products/a-man-raising-a-birthday-cake-and-inside-an-auto-repair-shop-with-cars_740x.jpg?v=1534312906"} 
+                        width={'80%'}
+                        height={'auto'}
+                        />
                     </div>
 
         
@@ -121,7 +53,7 @@ class AdminMainPage extends Component {
                 <br/>
                
                 <hr/>
-                {myTable}   
+                {/* {myTable}    */}
             </div>
         );
     }

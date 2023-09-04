@@ -34,10 +34,6 @@ class Login extends Component {
             this.props.history.push('/');
             // console.log(user);
         }
-
-        navigator.geolocation.getCurrentPosition(function(position) {
-            console.log("Latitude is :", position);
-          });
     }
 
     inputChangeHandler = (event) => {

@@ -8,11 +8,15 @@ class ListWorkdoneComponent extends Component{
         return (
            
             <tr>
-                <td className=""> {this.props.id} </td>
-                <td className=""> {this.props.name} </td>
-                <td className="" > {date.format(new Date(this.props.closed), 'DD. MM. YYYY. - HH:mm')  } </td>
-                <td className=""> {this.props.price} </td>
-                <td className=""> {this.props.car} </td>
+                <td className="" onClick={this.props.forwardToOrder}> {this.props.id} </td>
+                <td className="" onClick={this.props.forwardToOrder}> {this.props.name} </td>
+                <td className="" onClick={this.props.forwardToOrder} style={this.props.showDoneBy ?  {} : {display: 'none'}}> {this.props.price} </td>
+                <td className="" onClick={this.props.forwardToOrder}> {date.format(new Date(this.props.closed), 'DD. MM. YYYY. - HH:mm')  } </td>
+                <td className="" onClick={this.props.forwardToOrder}
+                style={this.props.showDoneBy ?  {} : {display: 'none'}}> {this.props.doneBy} </td>
+                
+                <td className="" onClick={this.props.forwardToOrder}> {this.props.salary} </td>
+                <td className="" onClick={this.props.forwardToOrder}> {this.props.car} </td>
             </tr> 
            
         )

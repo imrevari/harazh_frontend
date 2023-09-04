@@ -14,9 +14,10 @@ class ListOrderComponentDetailed extends Component{
 
         return (
            
-            <tr>
-                <td className="" onClick={this.props.details}> {this.props.id} </td>
+            <tr bgcolor={this.props.colorStatus}>
+                <td className="" onClick={this.props.details} > {this.props.id} </td>
                 <td className="" onClick={this.props.details}> {this.props.car} </td>
+                <td className="" style={this.props.browser === 'Android OS' ? {display: 'none'} : {}} onClick={this.props.details}> {this.props.problem} </td>
                 <td className="" onClick={this.props.details}> {this.props.name} </td>
                 <td className="" onClick={this.props.details}> {date.format(new Date(this.props.opened), 'DD. MM. YYYY. - HH:mm')  } </td>
                 <td className=""  style={this.props.isClosed ? {} : {display: 'none'} } > {date.format(new Date(this.props.closed), 'DD. MM. YYYY. - HH:mm')  } </td>

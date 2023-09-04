@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-import {Link} from 'react-router-dom';
 
 import ListCustomerComponent from '../../components/Customer/ListCustomerComponent'
 import '../../components/Customer/ListCustomerComponent.css'
@@ -51,12 +50,13 @@ class CustomerList extends Component{
 
     createOrder = (id) =>{ 
         // console.log('creating order for ' + id);
-        this.props.history.push("/newOrder/" + id + "/0");
+        const carId = (typeof(this.props.match.params.car) === 'undefined') ? 0 : this.props.match.params.car
+        this.props.history.push("/newOrder/" + id + "/" + carId);
     }
 
     allOrders = (id) =>{
         // console.log('orders of ' + id);
-        this.props.history.push("/openOrder/x/" + id);
+        this.props.history.push("/ordersOf/x/" + id);
     }
 
     sortMyList = () => {
@@ -220,6 +220,16 @@ class CustomerList extends Component{
             })
     };
 
+    createNewCustomer = () =>{
+        this.props.history.push({
+            pathname: "/newCustomer",
+            state: { 
+                newName: this.state.fileteredBy,
+                car: this.props.match.params.car
+            }
+          })
+    }
+
 
 
     componentDidMount(){
@@ -319,9 +329,11 @@ class CustomerList extends Component{
                     <br/>
                     <hr/>
                     <div style={this.props.match.params.car ? {display: 'none'} : {}} >
-                                <Link to="/newCustomer">
-                                    <button className="my-button">Свторити Клiента</button>
-                                </Link>
+                        <button className="my-button" onClick={this.createNewCustomer}>Свторити Клiента</button>
+                    </div>
+
+                    <div style={this.props.match.params.car ? {} : {display: 'none'}} >
+                        <button className="my-button" onClick={this.createNewCustomer}>Свторити і добавити Клiента</button>
                     </div>
 
                 </div>

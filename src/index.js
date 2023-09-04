@@ -6,8 +6,8 @@ import App from './App';
 import axios from 'axios';
 
 
-axios.defaults.baseURL = 'http://localhost:443/';
-//axios.defaults.baseURL = 'http://164.90.231.78:443/';
+//axios.defaults.baseURL = 'http://localhost:443/';
+axios.defaults.baseURL = 'http://167.172.178.224:443/';
 axios.defaults.withCredentials = true;
 
 ReactDOM.render(<App />, document.getElementById('root'));
