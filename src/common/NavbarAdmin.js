@@ -6,7 +6,7 @@ const navbarAdmin = (props) => (
 
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <div className="container">
-            <Link className="navbar-brand" to="/">ГАРАЖ - ADMIN</Link>
+            <Link className="navbar-brand" to="/">ГАРАЖ - АДМІН</Link>
             {/* {console.log( props.user)} */}
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor03"
                     aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,6 +22,8 @@ const navbarAdmin = (props) => (
                             <Link className="nav-link" to="/partsList">Запчастi </Link>
                             <Link className="nav-link" to="/worksList">Роботи</Link>
                             <Link className="nav-link" to="/userList">Пользователi</Link>
+                            <Link className="nav-link" to="/report">Одчоти</Link>
+                            {/* <div className="nav-link" onClick={() => alert('Функція ще не робит')}></div>  */}
                             <Link className="nav-link" to="/logout">Вийти</Link>
                         </li>
                     </ul>

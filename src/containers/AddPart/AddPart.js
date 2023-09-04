@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import axios from 'axios';
+import {RingLoader} from "react-spinners"
 
 class AddPart extends Component{
 
@@ -31,7 +32,8 @@ class AddPart extends Component{
                 isValid: true,
                 message: ''
             }
-        }
+        },
+        disabled: false
     };
 
 
@@ -58,7 +60,7 @@ class AddPart extends Component{
 
     postDataHandler = (event) => {
         event.preventDefault();
-
+        this.setState({...this.state, disabled: true})
         const formData = {};
         for (let formElementIdentifier in this.state.newPartForm) {
             formData[formElementIdentifier] = this.state.newPartForm[formElementIdentifier].value;
@@ -73,38 +75,23 @@ class AddPart extends Component{
         }
 
         axios({method: method, url: url, data: formData})
-            .then(() => {
-                this.setState({
-                    newPartForm: {
-                        name: {
-                            value: '',
-                            isValid: true,
-                            message: ''
-                        },
-                        description: {
-                            value: '',
-                            isValid: true,
-                            message: ''
-                        },
-                        retailPrice: {
-                            value: '',
-                            isValid: true,
-                            message: ''
-                        },
-                        purchasePrice: {
-                            value: '',
-                            isValid: true,
-                            message: ''
-                        }
-                    }
-                })
-            })
-            .then(() => {
-                this.props.history.push('/partsList');
-                setTimeout(this.hideMessage, 1500);
+            .then((response) => {
+                if(typeof(this.props.location.state) !== 'undefined' && this.props.location.state.orderId){
+                    const partId = response.data.id
+                    const orderId = this.props.location.state.orderId
+                    //this.addWorkToOrder(workId, orderId)
+                    setTimeout(() => { 
+                        this.props.history.push("/addCarPartCout/" + orderId + '/' + partId)
+                     }, 1000);
+                }else{
+                    setTimeout(() => { 
+                        this.props.history.push('/partsList');
+                     }, 1500);
+                }
+                this.setState({...this.state})
             })
             .catch(error => {
-                // console.log(error.response);
+                console.log(error);
                 if (error.response.data.hasOwnProperty("fieldErrors")) {
                     this.validationHandler(error);
                 } else {
@@ -145,7 +132,7 @@ class AddPart extends Component{
                 updatedCategoryForm[fieldError.field] = updatedFormElement;
             }
 
-            this.setState({...this.state, newPartForm: updatedCategoryForm});
+            this.setState({...this.state, newPartForm: updatedCategoryForm, disabled: false});
         } else {
             this.setState({
                 ...this.state,
@@ -155,7 +142,8 @@ class AddPart extends Component{
                         isValid: false,
                         message: 'Please don\'t mess with my input fields'
                     }
-                }
+                },
+                disabled: false
             })
         }
     };
@@ -189,6 +177,11 @@ class AddPart extends Component{
         if (this.props.match.params.id) {
             this.getPartByParamsId();
         }
+        else if(this.props.location.state){
+            let updatableForm = this.state.newPartForm
+            updatableForm['name'].value = this.props.location.state.partName
+            this.setState({...this.state, newWorkForm: updatableForm})
+        }
     }
 
 
@@ -199,6 +192,7 @@ class AddPart extends Component{
                 <hr/>
                 <br/>
                 <form onSubmit={this.postDataHandler}>
+                    <RingLoader  color={"red"} loading={this.state.disabled} size={150} />
                     <div className="form-group">
                         <label
                             className={this.state.newPartForm.name.isValid ? "control-label input-label" : "control-label input-label invalid-label"}>
@@ -206,6 +200,7 @@ class AddPart extends Component{
                         <input
                             className={this.state.newPartForm.name.isValid ? "form-control my-input-field" : "form-control my-input-field is-invalid"}
                             name="name"
+                            disabled={this.state.disabled}
                             value={this.state.newPartForm.name.value}
                             onChange={this.inputChangeHandler}
                         />
@@ -223,6 +218,7 @@ class AddPart extends Component{
                         <textarea className={"my-textarea"}
                             type="text"
                             name="description"
+                            disabled={this.state.disabled}
                             value={this.state.newPartForm.description.value}
                             onChange={this.inputChangeHandler}
                         />
@@ -238,6 +234,7 @@ class AddPart extends Component{
                             min="0.01"
                             id="retailPrice"
                             name="retailPrice"
+                            disabled={this.state.disabled}
                             value={this.state.newPartForm.retailPrice.value}
                             onChange={this.inputChangeHandler}
                         />
@@ -254,17 +251,21 @@ class AddPart extends Component{
                             min="0.01"
                             id="purchasePrice"
                             name="purchasePrice"
+                            disabled={this.state.disabled}
                             value={this.state.newPartForm.purchasePrice.value}
                             onChange={this.inputChangeHandler}
                         />
                         <span className="form-text invalid-feedback">{this.state.newPartForm.purchasePrice.message}</span>
                     </div>
                     
-                    
                     <br/>
-                    <button className="btn btn-info my-button" type="submit" key="submit">Сохранити</button>
+                    <button className="btn btn-info my-button" type="submit" key="submit" disabled={this.state.disabled}>
+                        {typeof (this.props.location.state) === 'undefined' ?
+                        'Сохранити' :
+                         this.props.location.state.orderId ? 'Сохранити і добавити' : 'Сохранити'}
+                    </button>
 
-                    <button className=" btn btn-danger my-button" key='cancel' type="button" onClick={this.props.history.goBack}>Отмена</button>
+                    <button className=" btn btn-danger my-button" key='cancel' type="button" disabled={this.state.disabled} onClick={this.props.history.goBack}>Отмена</button>
                 </form>
             </div>
         )

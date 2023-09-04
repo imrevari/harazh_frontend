@@ -9,9 +9,10 @@ import '../../components/ListPart/ListPartComponent.css'
 class WorkList extends Component{
 
 
-    // constructor(props) {
-    //     super(props);
-    // }
+    constructor(props) {
+        super(props);
+        document.title = 'Роботи - Г а р а ж';
+    }
 
     left = '<<<';
     right = '>>>'
@@ -38,12 +39,40 @@ class WorkList extends Component{
     };
 
     editWork = (id) => {
-         this.props.history.push("/editWork/" + id);
+        if (this.props.match.params.id){
+            this.props.history.push({
+                pathname: "/editWork/" + id,
+                state: { 
+                    orderId: this.props.match.params.id,
+                }
+              })
+
+        }else{
+            this.props.history.push("/editWork/" + id);
+        }
     };
  
-     deleteWork = (id) =>{ 
-         console.log('deleting ' + id);
+    deleteWork = (id, name) =>{
+        const result = window.confirm("ВИДАЛИТИ " + name + '?');
+        if(result){
+            this.delete(id, name)
+        }
     };
+
+    delete = (id, name) =>{
+        axios.delete('/work/' + id)
+            .then(response => {
+                //console.log(response);
+                alert('Видаляю: ' + name)
+                window.location.reload(false)
+            })
+            .catch(error => {
+                // console.log('hello' + error);
+                this.setState(() => {
+                    throw error;
+                })
+            })
+    } 
  
      addWork = (idOfWork) =>{ 
         //  console.log('adding ' + idOfWork);
@@ -87,29 +116,23 @@ class WorkList extends Component{
    
            if (type === 'name' && this.state.sorted === 'asc' ){
                const result = updatableList.sort((a, b) => (a.name.toLowerCase() < b.name.toLowerCase()) ? 1 : -1 );
-   
                this.setState({...this.state,
                    sorted: 'desc' , 
                    sortedFilteredList: result });
-   
            }
    
            if (type === 'price' && (this.state.sorted === '' || this.state.sorted === 'desc') ){
-               const result = updatableList.sort((a, b) => (a.retailPrice > b.retailPrice) ? 1 : -1 );
-   
+               const result = updatableList.sort((a, b) => (a.price >= b.price) ? 1 : -1 );
                this.setState({...this.state,
                    sorted: 'asc' , 
                    sortedFilteredList: result });
-   
            }
    
            if (type === 'price' && this.state.sorted === 'asc' ){
-               const result = updatableList.sort((a, b) => (a.retailPrice < b.retailPrice) ? 1 : -1 );
-   
+               const result = updatableList.sort((a, b) => (a.price < b.price) ? 1 : -1 );
                this.setState({...this.state,
                    sorted: 'desc' , 
                    sortedFilteredList: result });
-   
            }
    
     }
@@ -280,6 +303,17 @@ class WorkList extends Component{
             })
     };
 
+    createWorkForOrder = (orderId) =>{
+        this.props.history.push({
+            pathname: "/addWork/",
+            state: { 
+                orderId: orderId,
+                category: this.state.fileteredByCategory,
+                workName: this.state.fileteredBy
+            }
+          })
+    }
+
 
 
     componentDidMount(){
@@ -303,7 +337,7 @@ class WorkList extends Component{
                     desc={item.description}
                     price={item.price}
                     edit={() => this.editWork(item.id)}
-                    delete={() => this.deleteWork(item.id)}
+                    delete={() => this.deleteWork(item.id, item.name)}
                     juser={juser}
                     add={() => this.addWork(item.id)}
                     id={this.props.match.params.id}
@@ -319,16 +353,16 @@ class WorkList extends Component{
                             <th className="n"  onClick={() => this.sortMyList('name')}>Назва &#8645;</th>
                             <th className="p" onClick={() => this.sortMyList('price')}>цiна &#8645;</th>
                             <th className="edit" style={
-                                juser.role=== 'ROLE_USER' ? 
+                                juser.role=== 'ROLE_JUNIOR_USER' ? 
                                 {display: 'none'} : 
-                                (this.props.match.params.id === undefined ?  {} : {display: 'none'})
+                                {}
                             } ></th>
                             <th className="delete" style={
-                                juser.role=== 'ROLE_USER' ? 
+                                juser.role=== 'ROLE_JUNIOR_USER' ? 
                                 {display: 'none'} : 
                                 (this.props.match.params.id === undefined ?  {} : {display: 'none'})
                             }></th>
-                            <th className="add" style={this.props.match.params.id === undefined ?  {display: 'none'} : {}}></th>
+                            <th className="delete" style={this.props.match.params.id === undefined ?  {display: 'none'} : {}}></th>
                         </tr>
                     </thead>
                 </table>
@@ -370,7 +404,7 @@ class WorkList extends Component{
                                     value={this.state.fileteredByCategory}
                                     onChange={this.filterMyList}
                                     >
-                                    <option key="all" value="all">всi Категорiii</option>
+                                    <option key="all" value="all">всi Категорiї</option>
                                     {this.state.work_categories.map((value) => {
                                         return <option key={value.id} value={value.id}>{value.categoryName}</option>
                                     })}
@@ -394,13 +428,16 @@ class WorkList extends Component{
                     <br/>
                     <hr/>
                     <div style={this.props.match.params.id ? {display: 'none'} : {}} >
-                                <Link to="/addWork">
-                                    <button className="my-button">Свторити роботу</button>
-                                </Link>
-
+                                
+                                <button className="my-button" onClick={() => this.createWorkForOrder()}>Свторити роботу</button>
+                                
                                 <Link to="/workCategory">
-                                    <button className="my-button">Категорiii</button>
+                                    <button className="my-button">Категорiї</button>
                                 </Link>
+                    </div>
+
+                    <div style={this.props.match.params.id ? (juser.role==='ROLE_JUNIOR_USER' ? {display: 'none'} : {}) : {display: 'none'}} >
+                        <button className="my-button" onClick={() => this.createWorkForOrder(this.props.match.params.id)}>Свторити і добавити роботу</button>
                     </div>
 
                 </div>

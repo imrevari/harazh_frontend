@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-
+import {RingLoader} from "react-spinners";
 class AddCar extends Component{
 
     constructor(props) {
@@ -27,11 +27,13 @@ class AddCar extends Component{
                 isValid: true,
                 message: ''
             }
-        }
+        },
+        disabled: false
     };
 
     inputChangeHandler = (event) => {
         const target = event.target;
+
         const updatedCarForm = {
             ...this.state.newCarForm
         };
@@ -42,11 +44,8 @@ class AddCar extends Component{
         let value;
         value = target.value;
 
-        if (target.name === 'carMade'){
-            updatedFormElement.value = value.toUpperCase();
-        }else{
-            updatedFormElement.value = value;
-        }
+        updatedFormElement.value = value.toUpperCase();
+
         updatedFormElement.isValid = true;
         updatedCarForm[target.name] = updatedFormElement;
 
@@ -57,7 +56,7 @@ class AddCar extends Component{
 
     postDataHandler = (event) => {
         event.preventDefault();
-
+        this.setState({...this.state, disabled: true})
         const formData = {};
         for (let formElementIdentifier in this.state.newCarForm) {
             formData[formElementIdentifier] = this.state.newCarForm[formElementIdentifier].value;
@@ -67,7 +66,13 @@ class AddCar extends Component{
         let url = '/cars';
         let method = 'post';
         const id = this.props.match.params.id;
-        const cust = this.props.match.params.cust;
+        const cust = this.props.match.params.cust ?
+        this.props.match.params.cust :
+        (typeof(this.props.location.state) === 'undefined' ? false :
+            (this.props.location.state.customer ? this.props.location.state.customer : false)
+        )
+
+        ;
         if (id) {
             url += '/' + id;
             method = 'put';
@@ -80,8 +85,10 @@ class AddCar extends Component{
             axios({method: method, url: url, data: formData})
             .then((response) => {
                 // console.log(response);
-                this.props.history.push('/newOrder/' + cust + '/' + response.data.id);
-                setTimeout(this.hideMessage, 1500);
+                setTimeout(() => { 
+                    this.props.history.push('/newOrder/' + cust + '/' + response.data.id);
+                 }, 100);
+                this.setState({...this.state})
             })
             .catch(error => {
                 // console.log(error.response);
@@ -96,29 +103,10 @@ class AddCar extends Component{
         }else{
             axios({method: method, url: url, data: formData})
             .then(() => {
-                this.setState({
-                    newCarForm: {
-                        vinCode: {
-                            value: '',
-                            isValid: true,
-                            message: ''
-                        },
-                        licencePlate: {
-                            value: '',
-                            isValid: true,
-                            message: ''
-                        },
-                        carMade: {
-                            value: '',
-                            isValid: true,
-                            message: ''
-                        }
-                    }
-                })
-            })
-            .then(() => {
-                this.props.history.push('/carList');
-                setTimeout(this.hideMessage, 1500);
+                setTimeout(() => { 
+                    this.props.history.push('/carList')
+                 }, 500);
+                this.setState({...this.state})
             })
             .catch(error => {
                 // console.log(error.response);
@@ -133,14 +121,6 @@ class AddCar extends Component{
         }
 
         
-    };
-
-
-    hideMessage = () => {
-        this.setState({
-            ...this.state,
-            emailSent: false
-        })
     };
 
     validationHandler = (error) => {
@@ -167,7 +147,7 @@ class AddCar extends Component{
                 updatedCategoryForm[fieldError.field] = updatedFormElement;
             }
 
-            this.setState({...this.state, newCarForm: updatedCategoryForm});
+            this.setState({...this.state, newCarForm: updatedCategoryForm, disabled: false});
         } else {
             this.setState({
                 ...this.state,
@@ -177,7 +157,8 @@ class AddCar extends Component{
                         isValid: false,
                         message: 'Please don\'t mess with my input fields'
                     }
-                }
+                },
+                disabled: false
             })
         }
     };
@@ -213,20 +194,28 @@ class AddCar extends Component{
         if (this.props.match.params.id) {
             this.getCarByParamsId();
         }
+        else if(this.props.location.state){
+            let updatableForm = this.state.newCarForm
+            updatableForm['vinCode'].value = this.props.location.state.newCarVin
+            updatableForm['licencePlate'].value = this.props.location.state.newCarLicense
+            updatableForm['carMade'].value = this.props.location.state.newCarMade
+            this.setState({...this.state, newCarForm: updatableForm})
+        }
     }
-
-    
-
-
 
 
     render() {
+        const saveOrSaveAndNeworder = this.props.match.params.cust ? 
+        true :
+        (typeof(this.props.location.state) === 'undefined' ? false : (this.props.location.state.customer ? true : false))
+
         return (
             <div className="container">
                 <h2> {this.props.match.params.id != null ? "Змiнити" : "Нова"} Машин{this.props.match.params.id != null ? "у" : "а"}</h2>
                 <hr/>
                 <br/>
                 <form onSubmit={this.postDataHandler}>
+                    <RingLoader  color={"red"} loading={this.state.disabled} size={150} />
                     <div className="form-group">
                         <label
                             className={this.state.newCarForm.carMade.isValid ? "control-label input-label" : "control-label input-label invalid-label"}>
@@ -234,6 +223,7 @@ class AddCar extends Component{
                         <input
                             className={this.state.newCarForm.carMade.isValid ? "form-control my-input-field" : "form-control my-input-field is-invalid"}
                             name="carMade"
+                            disabled={this.state.disabled}
                             value={this.state.newCarForm.carMade.value}
                             onChange={this.inputChangeHandler}
                         />
@@ -247,6 +237,7 @@ class AddCar extends Component{
                         <input
                             className={this.state.newCarForm.licencePlate.isValid ? "form-control my-input-field" : "form-control my-input-field is-invalid"}
                             name="licencePlate"
+                            disabled={this.state.disabled}
                             value={this.state.newCarForm.licencePlate.value}
                             onChange={this.inputChangeHandler}
                         />
@@ -259,17 +250,19 @@ class AddCar extends Component{
                         <input
                             className={this.state.newCarForm.vinCode.isValid ? "form-control my-input-field" : "form-control my-input-field is-invalid"}
                             name="vinCode"
+                            disabled={this.state.disabled}
                             value={this.state.newCarForm.vinCode.value}
                             onChange={this.inputChangeHandler}
                         />
                         <span className="form-text invalid-feedback">{this.state.newCarForm.vinCode.message}</span>
                     </div>
                     
-                    
                     <br/>
-                    <button className="btn btn-info my-button" type="submit" key="submit">Сохранити</button>
+                    <button className="btn btn-info my-button" type="submit" key="submit" disabled={this.state.disabled}>
+                        {saveOrSaveAndNeworder ? 'Сохранити і добавити' : 'Сохранити'}
+                    </button>
 
-                    <button className=" btn btn-danger my-button" key='cancel' type="button" onClick={this.props.history.goBack}>Отмена</button>
+                    <button className=" btn btn-danger my-button" key='cancel' type="button" disabled={this.state.disabled} onClick={this.props.history.goBack}>Отмена</button>
 
                 </form>
 

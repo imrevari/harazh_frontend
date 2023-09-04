@@ -26,9 +26,20 @@ class MyWorks extends Component{
 
         sortedFilteredList: [],
 
-        beginDate: '1970-01-01',
+        beginDate: 
+        (new Date(Date.now()).getDay() === 1)
+          ?
+          new Date(Date.now()).toISOString().split('T')[0]
+          :
+          (
+            new Date(Date.now()).getDay() === 0
+            ?
+            new Date(new Date(Date.now()).setDate(new Date(Date.now()).getDate() - 6)).toISOString().split('T')[0]
+            :
+            new Date(new Date(Date.now()).setDate(new Date(Date.now()).getDate() - new Date(Date.now()).getDay() + 1)).toISOString().split('T')[0]
+          ),
 
-        endDate: '1970-01-01',
+        endDate: new Date(Date.now()).toISOString().split('T')[0],
 
         itemsToShow: 10,
 
@@ -39,7 +50,7 @@ class MyWorks extends Component{
 
     totalToget = () =>{
         let total = 0;
-        this.state.sortedFilteredList.map( item => { return(total += item.price)})
+        this.state.sortedFilteredList.map( item => { return(total += item.salary)})
         return total;
     }
 
@@ -201,6 +212,25 @@ class MyWorks extends Component{
                     sortedFilteredList: result });
     
             }
+
+            if (type === 'user' && (this.state.sorted === '' || this.state.sorted === 'desc') ){
+                const result = updatableList.sort((a, b) => (a.userName.toLowerCase() > b.userName.toLowerCase()) ? 1 : -1 );
+    
+                this.setState({...this.state,
+                    sorted: 'asc' , 
+                    sortedFilteredList: result });
+    
+            }
+    
+            if (type === 'user' && this.state.sorted === 'asc' ){
+                 const result = updatableList.sort((a, b) => (a.userName.toLowerCase() < b.userName.toLowerCase()) ? 1 : -1 );
+    
+                this.setState({...this.state,
+                     sorted: 'desc' , 
+                    sortedFilteredList: result });
+    
+            }
+
    
     }
 
@@ -212,9 +242,7 @@ class MyWorks extends Component{
 
         const updatableList = [...this.state.incoming];
 
-        const result = updatableList.filter((item) => item.orderOpened >= value && item.orderOpened <= this.state.endDate + 'Z');
-
-        // console.log(result)
+        const result = updatableList.filter((item) => item.orderClosed >= value && item.orderClosed <= this.state.endDate + 'Z');
 
         const iToShow = [this.state.itemsToShow];
 
@@ -236,7 +264,7 @@ class MyWorks extends Component{
 
         const updatableList = [...this.state.incoming];
 
-        const result = updatableList.filter((item) => item.orderOpened >= this.state.beginDate && item.orderOpened <= value + 'Z') ;
+        const result = updatableList.filter((item) => item.orderClosed >= this.state.beginDate && item.orderClosed <= value + 'Z') ;
 
         const iToShow = [this.state.itemsToShow];
 
@@ -249,18 +277,32 @@ class MyWorks extends Component{
     };
 
     setStateFromResponse = (response) =>{
-        let _begDate = '1970-01-01';
-        let _endDate = '1970-01-01';
-        if(response.data.length !== 0){
-            _begDate = response.data[0].orderClosed;
-            _endDate = response.data[response.data.length - 1].orderClosed;
+        let beginDateToUpdate = this.state.beginDate
+        let endDateToUpdate = this.state.endDate
+        if(typeof(this.props.location.state) !== 'undefined'){
+            if(typeof(this.props.location.state.requestBody) !== 'undefined'){
+                beginDateToUpdate = this.props.location.state.requestBody.fromDate
+                endDateToUpdate = this.props.location.state.requestBody.toDate
+            } 
         }
-        this.setState({incoming: response.data,
-            sortedFilteredList: response.data,
-            beginDate: date.format(new Date(_begDate), 'YYYY-MM-DD'),
-            endDate: date.format(new Date(_endDate), 'YYYY-MM-DD')
+        let maxToShow = !this.props.match.params.id && this.props.location.state ? 
+        response.data.length : this.state.itemsToShow
+        const listWithSetDates = response.data.filter((item) => item.orderClosed >= beginDateToUpdate + 'T00:00:00' && item.orderClosed <= endDateToUpdate + 'T23:59:50');
+        this.setState({
+            ...this.state,
+            incoming: response.data,
+            sortedFilteredList: listWithSetDates,
+            itemsToShow: maxToShow,
+            endIndex: maxToShow,
+            beginDate: beginDateToUpdate,
+            endDate: endDateToUpdate
             });
-    }               
+    }
+    
+    forwardToOrder = (id) =>{ 
+        // console.log('creating order for ' + id);
+        this.props.history.push("/order/" + id);
+    }
 
 
     getMyWorks = () =>{
@@ -287,18 +329,28 @@ class MyWorks extends Component{
             })
     }
 
+    getWorksFromRequestBody = (requestBody) =>{
+        axios({method: 'post', url: '/users/report/', data: requestBody})
+            .then((response) => {
+                this.setStateFromResponse(response)
+            })
+            .catch(error => {
+                this.setState(() => {
+                    throw error;
+               })
+           })
+    }
 
     componentDidMount(){
-
         if (this.props.match.params.id) {
             this.getWorksOfUser();
+        }else if(this.props.location.state){
+            //get from the server
+            this.getWorksFromRequestBody(this.props.location.state.requestBody)
         }else{
             this.getMyWorks();
         }
     }
-
-
-
 
     render() {
 
@@ -306,7 +358,7 @@ class MyWorks extends Component{
         // const { detect } = require('detect-browser');
         // const browser = detect();
         // console.log(browser.name + ' ' + browser.version  + ' ' + browser.os + 'Android OS')
-
+        const showDoneBy = !this.props.match.params.id && this.props.location.state;
 
         const listOfOrders = this.state.sortedFilteredList.slice(this.state.beginIndex, this.state.endIndex).map( (item, index) => {
             
@@ -317,27 +369,33 @@ class MyWorks extends Component{
                     name={item.workName}
                     price={item.price}
                     car={item.licencePlate}
-                    closed={item.orderClosed} 
+                    closed={item.orderClosed}
+                    forwardToOrder={() => this.forwardToOrder(item.orderId)}
+                    doneBy={item.userName}
+                    showDoneBy={showDoneBy}
+                    salary={item.salary}
                 />
             )
         });
-
         const myTable = ( 
-            
+                
                 <table border="1" >
                     <thead>
                         <tr>
                             <th className="" onClick={() => this.sortMyList('number')}>Заказ &#8645;</th>
                             <th className="" onClick={() => this.sortMyList('work')}>Робота &#8645;</th>
+                            <th className=""  style={showDoneBy ?  {} : {display: 'none'}}>грн</th>
                             <th className="" onClick={() => this.sortMyList('date')}>Зроблена &#8645;</th>
-                            <th className=""  >грн</th>
+                            <th className="" onClick={() => this.sortMyList('user')}
+                            style={showDoneBy ?  {} : {display: 'none'}}>Зробив &#8645;</th>
+                            <th className=""  >з/п</th>
                             <th className="" onClick={() => this.sortMyList('car')}>машина &#8645;</th>
                         </tr>
                     </thead>
                     <tbody>
                     {listOfOrders} 
                     <tr>
-                        <td colSpan={"3"}>Всього:</td>
+                        <td colSpan={showDoneBy ? "5" :"3"}>Всього:</td>
                         <td className="">{this.totalToget()}</td>
                         <td className="">грн</td>
                     </tr>
@@ -349,13 +407,24 @@ class MyWorks extends Component{
 
         return(
             <div>
-                
-                <h2> Роботи {juser.name}</h2>
+                <h2> {
+                     (this.props.match.params.id)
+                    ?
+                    (this.props.location.state) ? 'Роботи ' + this.props.location.state.name : 'Роботи nameX'
+                    :
+                    (this.props.location.state
+                        ? 
+                        'Одчоти з ' + date.format(new Date(this.props.location.state.requestBody.fromDate), 'DD. MM. YYYY') +
+                        ' по ' + date.format(new Date(this.props.location.state.requestBody.toDate), 'DD. MM. YYYY')
+                        :
+                        'Роботи ' + juser.name
+                    ) 
+                }</h2>
                 <hr/>
                 <br/>
 
                 <div className="form-group">
-                            <div>
+                            <div style={showDoneBy ?  {display: 'none'} : {}}>
                                
                                 <strong>       </strong>
                                 <label
@@ -374,10 +443,10 @@ class MyWorks extends Component{
 
                             </div>
 
-                            <div>
+                            <div style={showDoneBy ?  {display: 'none'} : {}}>
                                 <label
                                     className="control-label">
-                                    Одкритi мiж : </label>
+                                    Зроблені мiж : </label>
                                 <input
                                     className="form-control my-input-search-field-3" 
                                     name="from"
@@ -410,7 +479,7 @@ class MyWorks extends Component{
 
                 <br/>
                 
-                <div >
+                <div style={showDoneBy ?  {display: 'none'} : {}}>
                    {/* paginator code goes here */}
                     <strong onClick={this.paginatorLeft}>{this.left}     </strong> 
                     <strong>{this.state.beginIndex + 1} - {this.state.endIndex}</strong>

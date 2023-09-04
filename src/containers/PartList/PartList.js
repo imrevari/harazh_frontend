@@ -37,7 +37,17 @@ class PartList extends Component{
    
     editPart = (id) => {
        // console.log('editing ' + id);
-        this.props.history.push("/editPart/" + id);
+       if (this.props.match.params.id){
+            this.props.history.push({
+                pathname: "/editPart/" + id,
+                state: { 
+                    orderId: this.props.match.params.id,
+                }
+            })
+
+        }else{
+            this.props.history.push("/editPart/" + id);
+        }
     }
 
     deletePart = (id) =>{ 
@@ -211,6 +221,17 @@ class PartList extends Component{
             })
     };
 
+    createPartCountForOrder = (orderId) =>{
+        this.props.history.push({
+            pathname: "/addPart/",
+            state: { 
+                orderId: orderId,
+                //category: this.state.fileteredByCategory,
+                partName: this.state.fileteredBy
+            }
+          })
+    }
+
 
 
     componentDidMount(){
@@ -251,16 +272,17 @@ class PartList extends Component{
                             <th className="n"  onClick={() => this.sortMyList('name')}>Назва &#8645;</th>
                             <th className="p" onClick={() => this.sortMyList('retailPrice')}>цiна &#8645;</th>
                             <th className="edit" style={   
-                                juser.role=== 'ROLE_USER' ? 
+                                juser.role=== 'ROLE_JUNIOR_USER' ? 
                                 {display: 'none'} : 
-                                (this.props.match.params.id === undefined ?  {} : {display: 'none'})
+                                // (this.props.match.params.id === undefined ?  {} : {display: 'none'})
+                                {}
                             } ></th>
                             <th className="delete" style={
-                                juser.role=== 'ROLE_USER' ? 
+                                juser.role=== 'ROLE_JUNIOR_USER' ? 
                                 {display: 'none'} : 
                                 (this.props.match.params.id === undefined ?  {} : {display: 'none'})
                             }></th>
-                            <th className="add" style={this.props.match.params.id === undefined ?  {display: 'none'} : {}}></th>
+                            <th className="delete" style={this.props.match.params.id === undefined ?  {display: 'none'} : {}}></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -317,6 +339,13 @@ class PartList extends Component{
                                 <Link to="/addPart">
                                     <button className="my-button">Свторити запчасть</button>
                                 </Link>
+                    </div>
+                    <div style={this.props.match.params.id ? {display: 'none'} : {}} >
+                        <button className="my-button" onClick={() => this.createPartCountForOrder()}>Свторити</button>
+                    </div>
+
+                    <div style={this.props.match.params.id ? (juser.role==='ROLE_JUNIOR_USER' ? {display: 'none'} : {}) : {display: 'none'}} >
+                        <button className="my-button" onClick={() => this.createPartCountForOrder(this.props.match.params.id)}>Свторити і добавити запчасть</button>
                     </div>
 
                 </div>

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-
+import {RingLoader} from "react-spinners"
 
 class AddUser extends Component{
 
@@ -27,14 +27,20 @@ class AddUser extends Component{
                 value: '',
                 isValid: true,
                 message: ''
+            },
+            percentage: {
+                value: 0.5,
+                isValid: true,
+                message: ''
             }
         },
-        roles: []
+        roles: [],
+        disabled: false
     };
 
     postDataHandler = (event) => {
         event.preventDefault();
-
+        this.setState({...this.state, disabled: true})
         const formData = {};
         for (let formElementIdentifier in this.state.newUserForm) {
             formData[formElementIdentifier] = this.state.newUserForm[formElementIdentifier].value;
@@ -69,6 +75,11 @@ class AddUser extends Component{
                         },
                         role: {
                             value: '',
+                            isValid: true,
+                            message: ''
+                        },
+                        percentage: {
+                            value: 0.5,
                             isValid: true,
                             message: ''
                         }
@@ -121,7 +132,7 @@ class AddUser extends Component{
                 updatedCategoryForm[fieldError.field] = updatedFormElement;
             }
 
-            this.setState({...this.state, newUserForm: updatedCategoryForm});
+            this.setState({...this.state, newUserForm: updatedCategoryForm, disabled: false});
         } else {
             this.setState({
                 ...this.state,
@@ -131,7 +142,8 @@ class AddUser extends Component{
                         isValid: false,
                         message: 'Please don\'t mess with my input fields'
                     }
-                }
+                },
+                disabled: false
             })
         }
     };
@@ -143,8 +155,12 @@ class AddUser extends Component{
         const updatedUser = {
             ...this.state.newUserForm
         };
-
-        updatedUser[target.name].value = target.value;
+        if(target.name === 'percentage'){
+            updatedUser[target.name].value = (target.value / 100).toFixed(3);
+        }else{
+            updatedUser[target.name].value = target.value;
+        }
+        
 
         this.setState({newUserForm: updatedUser});
 
@@ -193,15 +209,14 @@ class AddUser extends Component{
 
 
     render() {
-
         // console.log(this.state)
-
         return (
             <div className="container">
                 <h2> {this.props.match.params.id != null ? "Змiнити" : "Новий"}  пользователь{this.props.match.params.id != null ? "а" : ""} </h2>
                 <hr/>
                 <br/>
                 <form onSubmit={this.postDataHandler}>
+                    <RingLoader  color={"red"} loading={this.state.disabled} size={150} />
                     <div className="form-group">
                         <label
                             className={this.state.newUserForm.name.isValid ? "control-label input-label" : "control-label input-label invalid-label"}>
@@ -209,6 +224,7 @@ class AddUser extends Component{
                         <input
                             className={this.state.newUserForm.name.isValid ? "form-control my-input-field" : "form-control my-input-field is-invalid"}
                             name="name"
+                            disabled={this.state.disabled}
                             value={this.state.newUserForm.name.value}
                             onChange={this.inputChangedHandler}
                         />
@@ -222,6 +238,7 @@ class AddUser extends Component{
                             className={this.state.newUserForm.password.isValid ? "form-control my-input-field" : "form-control my-input-field is-invalid"}
                             type="password"
                             name="password"
+                            disabled={this.state.disabled}
                             value={this.state.newUserForm.password.value}
                             onChange={this.inputChangedHandler}
                         />
@@ -234,6 +251,7 @@ class AddUser extends Component{
                         
 
                         value={this.state.newUserForm.role.value}
+                        disabled={this.state.disabled}
                         onChange={this.inputChangedHandler}
                         className="my-input-field">
 
@@ -244,11 +262,28 @@ class AddUser extends Component{
                         <span className="form-text invalid-feedback">{this.state.newUserForm.role.message}</span>
                     </div>
                     
+                    <div className="form-group">
+                        <label
+                            className={this.state.newUserForm.percentage.isValid ? "control-label input-label" : "control-label input-label invalid-label"}>
+                        Процент з/п:</label>
+                        <input
+                            className={this.state.newUserForm.percentage.isValid ? "form-control my-input-field" : "form-control my-input-field is-invalid"}
+                            name="percentage"
+                            type="number"
+                            min="1"
+                            max="100"
+                            disabled={this.state.disabled}
+                            value={(this.state.newUserForm.percentage.value * 100).toFixed(0)}
+                            onChange={this.inputChangedHandler}
+                        />
+                        <span className="form-text invalid-feedback">{this.state.newUserForm.percentage.message}</span>
+                    </div>
+                    
                     
                     <br/>
-                    <button className="btn btn-info my-button" type="submit" key="submit">Сохранити</button>
+                    <button className="btn btn-info my-button" type="submit" key="submit" disabled={this.state.disabled}>Сохранити</button>
 
-                    <button className=" btn btn-danger my-button" key='cancel' type="button" onClick={this.props.history.goBack}>Отмена</button>
+                    <button className=" btn btn-danger my-button" key='cancel' type="button" disabled={this.state.disabled} onClick={this.props.history.goBack}>Отмена</button>
                 </form>
             </div>
         )

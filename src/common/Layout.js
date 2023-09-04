@@ -5,6 +5,7 @@ import ErrorPage from '../components/ErrorPageDetail/ErrorPageDetail'
 import Navbar from './Navbar'
 import NavbarAdmin from './NavbarAdmin';
 import NavbarUser from './NavbarUser';
+import NavbarSeniorUser from './NavbarSeniorUser'
 import Login from '../containers/Login/Login'
 import AdminMainPage from '../containers/AdminMainPage/AdminMainPage'
 import MainPage from '../containers/MainPage/MainPage'
@@ -12,12 +13,14 @@ import Logout from '../containers/Logout/Logout'
 import AddCustomer from '../containers/AddCustomer/AddCustomer'
 import PrivateRoute from '../common/PrivateRoute'
 import PrivateRouteAdmin from '../common/PrivateRouteAdmin'
+import PrivateRouteSenioruser from '../common/PrivateRouterSenioruser'
 import AddPart from '../containers/AddPart/AddPart'
 //import PartsPage from '../containers/PartsPage/PartsPage'
 import PartList from '../containers/PartList/PartList'
 import CustomerList from '../containers/CustomerList/CustomerList'
 //import CustomersPage from '../containers/CustomersPage/CustomersPage'
 import NewOrder from '../containers/NewOrder/NewOrder'
+import TestNewOrder from '../containers/NewOrder/TestNewOrder'
 //import CarsPage from '../containers/CarsPage/CarsPage' 
 import AddCar from '../containers/AddCar/AddCar';
 import CarList from '../containers/CarList/CarList';
@@ -27,7 +30,7 @@ import AddWorkCategory from '../containers/AddWorkCategory/AddWorkCategory'
 import AddWork from '../containers/AddWork/AddWork';
 import WorkList from '../containers/WorkList/WorkList';
 import AddCarPartToOrder from '../containers/AddCarPartToOrder/AddCarPartToOrder';
-import OrderOpenOrClosed from '../containers/OrderOpenOrClosed/OrderOpenOrClosed';
+//import OrderOpenOrClosed from '../containers/OrderOpenOrClosed/OrderOpenOrClosed';
 import OrderList from '../containers/OrderList/OrderList';
 //import UsersPage from '../containers/UsersPage/UsersPage';
 import AddUser from '../containers/AddUser/AddUser';
@@ -36,25 +39,41 @@ import MyPage from '../containers/MyPage/MyPage';
 import ChangePassword from '../containers/ChangePassword/ChangePassword';
 import Receipt from '../containers/Receipt/Receipt';
 import MyWorks from '../containers/MyWorks/MyWorks';
+import OpenedOrders from '../containers/Order/OpenedOrders'
+import Report from '../containers/Report/Report';
+import UnpaidOrders from '../containers/Order/UnpaidOrders'
+import LastOrders from '../containers/Order/LastOrders'
 
 
 const layout = () => {
 
 
     const user = JSON.parse(localStorage.getItem('user'));
-    
+    const path = window.location.href
+    const receipt = path.includes('receipt')
     return (
         <div>
 
-                {localStorage.user ? ((user.role === 'ROLE_ADMIN') ? <NavbarAdmin user={user.name}/> :
-                <NavbarUser user={user.name}/>) :
+                {localStorage.user ? 
+                (
+                    (user.role === 'ROLE_ADMIN') ? 
+                    <NavbarAdmin user={user.name}/> :
+                        ((user.role === 'ROLE_SENIOR_USER') ? <NavbarSeniorUser user={user.name}/> : <NavbarUser user={user.name}/>)
+                ) 
+                :
                 <Navbar/>}
                 
 
             <div className="page_content container">
                 <Switch>
-                    {localStorage.user ? ((user.role === 'ROLE_ADMIN') ? <PrivateRouteAdmin path="/" exact component={AdminMainPage}/> :
-                    <PrivateRoute path="/" exact component={MainPage}/>) :
+                    {localStorage.user ? 
+                    (
+                        (user.role === 'ROLE_ADMIN' || user.role === 'ROLE_SENIOR_USER')
+                        ?
+                        <PrivateRouteSenioruser path="/" exact component={AdminMainPage}/>
+                        :
+                        <PrivateRoute path="/" exact component={MainPage}/>)
+                    :
                     <Route path="/" exact component={Login}/>}
 
                     <Route path="/login" exact component={Login}/>
@@ -62,42 +81,46 @@ const layout = () => {
                     
                     <PrivateRoute path="/mainPage" exact component={MainPage}/>
 
-                    <PrivateRouteAdmin path="/addPart" exact component={AddPart}/>
-                    <PrivateRouteAdmin path="/editPart/:id" exact component={AddPart}/>
+                    <PrivateRouteSenioruser path="/addPart" exact component={AddPart}/>
+                    <PrivateRouteSenioruser path="/editPart/:id" exact component={AddPart}/>
                     {/* <PrivateRouteAdmin path="/partsPage" exact component={PartsPage}/> */}
-                    <PrivateRouteAdmin path="/partsList" exact component={PartList}/>
+                    <PrivateRouteSenioruser path="/partsList" exact component={PartList}/>
                     <PrivateRoute path="/addParts/:id" exact component={PartList}/>
                     <PrivateRoute path="/addCarPartCout/:order/:part" exact component={AddCarPartToOrder}/>
 
 
-                    <PrivateRouteAdmin path="/customerList" exact component={CustomerList}/>
-                    <PrivateRoute path="/customerList/:car" exact component={CustomerList}/>
+                    <PrivateRouteSenioruser path="/customerList" exact component={CustomerList}/>
+                    <PrivateRouteSenioruser path="/customerList/:car" exact component={CustomerList}/>
                     {/* <PrivateRouteAdmin path="/customersPage" exact component={CustomersPage}/> */}
-                    <PrivateRouteAdmin path="/newCustomer" exact component={AddCustomer}/>
-                    <PrivateRouteAdmin path="/editCustomer/:id" exact component={AddCustomer}/>
-                    <PrivateRouteAdmin path="/creatingCustomer/:car" exact component={AddCustomer}/>  
+                    <PrivateRouteSenioruser path="/newCustomer" exact component={AddCustomer}/>
+                    <PrivateRouteSenioruser path="/editCustomer/:id" exact component={AddCustomer}/>
+                    <PrivateRouteSenioruser path="/creatingCustomer/:car" exact component={AddCustomer}/>  
 
 
-                    <PrivateRouteAdmin path="/newOrder" exact component={NewOrder}/>
-                    <PrivateRouteAdmin path="/newOrder/:cust/:car" exact component={NewOrder}/>
+                    <PrivateRouteSenioruser path="/newOrder" exact component={NewOrder}/>
+                    <PrivateRouteSenioruser path="/test" exact component={TestNewOrder}/>
+                    <PrivateRouteSenioruser path="/newOrder/:cust/:car" exact component={NewOrder}/>
                     <PrivateRoute path="/order/:id" exact component={Order}/>
-                    <PrivateRouteAdmin path="/openOrder/:car/:cust" exact component={OrderOpenOrClosed}/>
-                    <PrivateRouteAdmin path="/ordersOf/:state/:car/:cust" exact component={OrderList}/>
-                    <PrivateRoute path="/receipt/:id" exact component={Receipt}/>
+                    {/* <PrivateRouteSenioruser path="/openOrder/:car/:cust" exact component={OrderOpenOrClosed}/> */}
+                    <PrivateRouteSenioruser path="/ordersOf/:car/:cust" exact component={OrderList}/>
+                    <PrivateRouteSenioruser path="/receipt/:id" exact component={Receipt}/>
+                    <PrivateRoute path="/openedOrders" exact component={OpenedOrders}/>
+                    <PrivateRouteSenioruser path="/unpaid" exact component={UnpaidOrders}/>
+                    <PrivateRoute path="/lastOrders" exact component={LastOrders}/>
 
 
                     {/* <PrivateRouteAdmin path="/carsPage" exact component={CarsPage}/> */}
-                    <PrivateRouteAdmin path="/addCar" exact component={AddCar}/>
-                    <PrivateRouteAdmin path="/editCar/:id" exact component={AddCar}/>
-                    <PrivateRouteAdmin path="/carList" exact component={CarList}/>
-                    <PrivateRouteAdmin path="/carList/:cust" exact component={CarList}/>
-                    <PrivateRouteAdmin path="/creatingCar/:cust" exact component={AddCar}/>
+                    <PrivateRouteSenioruser path="/addCar" exact component={AddCar}/>
+                    <PrivateRouteSenioruser path="/editCar/:id" exact component={AddCar}/>
+                    <PrivateRouteSenioruser path="/carList" exact component={CarList}/>
+                    <PrivateRouteSenioruser path="/carList/:cust" exact component={CarList}/>
+                    <PrivateRouteSenioruser path="/creatingCar/:cust" exact component={AddCar}/>
 
 
                     {/* <PrivateRouteAdmin path="/worksPage" exact component={WorksPage}/> */}
-                    <PrivateRouteAdmin path="/addWork" exact component={AddWork}/>
-                    <PrivateRouteAdmin path="/editWork/:id" exact component={AddWork}/>
-                    <PrivateRouteAdmin path="/worksList" exact component={WorkList}/>
+                    <PrivateRouteSenioruser path="/addWork" exact component={AddWork}/>
+                    <PrivateRouteSenioruser path="/editWork/:id" exact component={AddWork}/>
+                    <PrivateRouteSenioruser path="/worksList" exact component={WorkList}/>
                     <PrivateRoute path="/addWorkToOrder/:id" exact component={WorkList}/>
 
 
@@ -108,11 +131,13 @@ const layout = () => {
                     <PrivateRouteAdmin path="/changeUser/:id/:order" exact component={UserList}/>
                     <PrivateRoute path="/myWorks" exact component={MyWorks}/>
                     <PrivateRouteAdmin path="/worksDoneBy/:id" exact component={MyWorks}/>
+                    <PrivateRouteAdmin path="/report" exact component={Report}/>
+                    <PrivateRouteAdmin path="/reportedWorks" exact component={MyWorks}/>
 
-                    <PrivateRouteAdmin path="/workCategory" exact component={WorkCategoryList}/>
-                    <PrivateRouteAdmin path="/workCategory/:id" exact component={WorkCategoryList}/>
-                    <PrivateRouteAdmin path="/addWorkCategory" exact component={AddWorkCategory}/>
-                    <PrivateRouteAdmin path="/editWorkCategory/:id" exact component={AddWorkCategory}/>
+                    <PrivateRouteSenioruser path="/workCategory" exact component={WorkCategoryList}/>
+                    <PrivateRouteSenioruser path="/workCategory/:id" exact component={WorkCategoryList}/>
+                    <PrivateRouteSenioruser path="/addWorkCategory" exact component={AddWorkCategory}/>
+                    <PrivateRouteSenioruser path="/editWorkCategory/:id" exact component={AddWorkCategory}/>
 
 
                     <PrivateRoute path="/myPage" exact component={MyPage}/>
@@ -123,7 +148,7 @@ const layout = () => {
                 </Switch>
             </div>
 
-            <footer style={ {textAlign: "left"}}><hr/> ©Imre</footer>        
+            <footer style={receipt ? {display: 'none'} : {textAlign: "left"}} ><hr/> ©Imre</footer>        
 
         </div>
     );

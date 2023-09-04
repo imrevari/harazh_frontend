@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-
+import {RingLoader} from "react-spinners"
 
 class AddCarPartToOrder extends Component{
 
     constructor(props) {
         super(props);
         document.title = 'Додати запчасть - Г а р а ж';
-        console.log(props);
+        //console.log(props);
     }
 
     state = {
@@ -18,8 +18,9 @@ class AddCarPartToOrder extends Component{
 	        retailPrice: ''
         },
 
-        amount: '',
-        totalPrice: ''
+        amount: 1,
+        totalPrice: '',
+        disabled: false 
     };
 
     inputChangeHandler = (event) => {
@@ -43,7 +44,7 @@ class AddCarPartToOrder extends Component{
 
     postDataHandler = (event) => {
         event.preventDefault();
-
+        this.setState({...this.state, disabled: true})
         const formData = {};
 
         formData.partId = this.state.part.id;
@@ -64,7 +65,7 @@ class AddCarPartToOrder extends Component{
                         retailPrice: ''
                     },
             
-                    amount: '',
+                    amount: 1,
                     totalPrice: ''
                 })
             })
@@ -125,15 +126,14 @@ class AddCarPartToOrder extends Component{
 
 
     render() {
-
         // console.log('adding part ' + this.props.match.params.part + ' to order ' + this.props.match.params.order) 
-
         return (
             <div className="container">
                 <h2> Додаю запчасть</h2>
                 <hr/>
                 <br/>
                 <form onSubmit={this.postDataHandler}>
+                    <RingLoader  color={"red"} loading={this.state.disabled} size={150} />
                     <div className="form-group">
                         <label
                             className={"control-label input-label"}>
@@ -179,17 +179,16 @@ class AddCarPartToOrder extends Component{
                             min="1"
                             id="amount"
                             name="amount"
+                            disabled={this.state.disabled}
                             value={this.state.amount}
                             onChange={this.inputChangeHandler}
                         />
-                       
                     </div>
                     
-                    
                     <br/>
-                    <button className="btn btn-info my-button" type="submit" key="submit">Додати</button>
+                    <button className="btn btn-info my-button" type="submit" key="submit" disabled={this.state.disabled}>Додати</button>
 
-                    <button className=" btn btn-danger my-button" key='cancel' type="button" onClick={this.props.history.goBack}>Отмена</button>
+                    <button className=" btn btn-danger my-button" key='cancel' type="button" disabled={this.state.disabled} onClick={this.props.history.goBack}>Отмена</button>
                 </form>
             </div>
         )

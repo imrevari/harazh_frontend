@@ -54,13 +54,13 @@ class Order extends Component{
 
         workFileteredBy: '',
 
-        itemsToShowWork: 5,
+        itemsToShowWork: 10,
 
         workBeginIndex: 0,
 
-        workEndIndex: 5,
+        workEndIndex: 10,
 
-
+        editDescription: false,
 
         sortedPart: '',
 
@@ -68,11 +68,11 @@ class Order extends Component{
 
         partFileteredBy: '',
 
-        itemsToShowPart: 5,
+        itemsToShowPart: 10,
 
         partBeginIndex: 0,
 
-        partEndIndex: 5
+        partEndIndex: 10
 
 
     };
@@ -511,36 +511,38 @@ class Order extends Component{
     };
 
     payFor = () =>{
-        axios.post('/orders/pay_for/' + this.state.order.id)
-                    .then((response) => {
-                        const updatedProductForm = {
-                            ...this.state.order
-                        };
-        
-                        for (let field in response.data) {
-                            let updatedFormElement = {
-                                ...updatedProductForm[field]
+        if(!this.state.order.orderClosed) {
+            alert('Заказ ще не закритий!!! Раз закрийте заказ!');
+        }else{
+            axios.post('/orders/pay_for/' + this.state.order.id)
+                        .then((response) => {
+                            const updatedProductForm = {
+                                ...this.state.order
                             };
-                            updatedFormElement = response.data[field];
-                            updatedProductForm[field] = updatedFormElement;
-                        }
-                        updatedProductForm.amountToPay = 0;
-                        
-                        this.setState({...this.state, order: updatedProductForm ,
-                            sortedFilteredListWork:  response.data.works});
-                    })
-                    .catch(error => {
-                        this.setState(() => {
-                            throw error;
+            
+                            for (let field in response.data) {
+                                let updatedFormElement = {
+                                    ...updatedProductForm[field]
+                                };
+                                updatedFormElement = response.data[field];
+                                updatedProductForm[field] = updatedFormElement;
+                            }
+                            updatedProductForm.amountToPay = 0;
+                            
+                            this.setState({...this.state, order: updatedProductForm ,
+                                sortedFilteredListWork:  response.data.works});
                         })
-                    })
+                        .catch(error => {
+                            this.setState(() => {
+                                throw error;
+                            })
+                        })
+        }
     }
 
     closeOrder = () =>{
         if (!this.ifAllWorksAreDone()){
             alert('Ще не всi роботи зробленi!!! Раз зроби всi роботи!');
-        }else if(this.ifAllWorksAreDone() && !this.state.order.payedFor) {
-            alert('Заказ ще не оплачений!!! Раз оплатiт заказ!');
         }else{
             axios.get('/orders/close/' + this.state.order.id)
                     .then((response) => {
@@ -569,7 +571,7 @@ class Order extends Component{
     }
 
     getReceipt = () =>{
-        console.log('getting the receipt');
+        // console.log('getting the receipt');
         this.props.history.push("/receipt/" + this.state.order.id);
     }
 
@@ -627,6 +629,48 @@ class Order extends Component{
         
     };
 
+    prepareEditDescription = () => {    
+        this.saveUpdatedDescrition()
+        this.setState({...this.state, editDescription: false});
+    }
+
+    setToEditDescription = () =>{     
+        if(!this.state.order.orderClosed){
+            this.setState({...this.state, editDescription: true})
+        }
+    }
+
+    editDescription = (event) =>{
+
+        const updatableOrder = {
+            ...this.state.order
+        };
+        updatableOrder['problem'] = event.target.value;
+        this.setState({...this.state, order: updatableOrder});
+    }
+
+    saveUpdatedDescrition(){
+        const formData = {problem: this.state.order.problem}
+        axios({method: 'post', url: '/orders/update_description/' + this.state.order.id, data: formData})
+            .then((response) => {
+                //console.log(response);
+                this.props.history.push('/order/' + response.data.id);
+                setTimeout(this.hideMessage, 1500);
+            })
+            .catch(error => {
+                //console.log(error.response);
+                if (error.response.data.hasOwnProperty("fieldErrors")) {
+                    this.props.history.push('/order/' + this.state.order.id);
+                    setTimeout(this.hideMessage, 1500);
+                } else {
+                    this.setState(() => {
+                        throw error;
+                    })
+                }
+            });
+    }
+
+
     componentDidMount() {
 
         if (this.props.match.params.id) {
@@ -669,7 +713,7 @@ class Order extends Component{
                         <th className="user"  onClick={() => this.sortMyWorkList('doneBy')} >Добавив/Зробив &#8645;</th>
                         {/* <th className="desc" style={(this.state.order.orderClosed || juser.role === 'ROLE_ADMIN') ? {display: 'none'} : {}} >опiсанiе</th> */}
                         <th className="done" onClick={() => this.sortMyWorkList('ifDone')}>&#8645;</th>
-                        <th className="done" style={(juser.role === 'ROLE_ADMIN' && !this.state.order.orderClosed) ? {} : {display: 'none'}} >Удалити</th>
+                        <th className="done" style={((juser.role === 'ROLE_ADMIN' || juser.role === 'ROLE_SENIOR_USER') && !this.state.order.orderClosed) ? {} : {display: 'none'}} >Удалити</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -707,8 +751,8 @@ class Order extends Component{
                         <th className="name"  onClick={() => this.sortMyPartList()} >запчасть &#8645;</th>
                         <th className="done" >колiчество </th> 
                         <th className="price" > обща цiна</th>
-                        <th className="user" style={(this.state.order.orderClosed || juser.role === 'ROLE_ADMIN') ? {display: 'none'} : {}} >опiсанiе</th>
-                        <th className="done" style={(juser.role === 'ROLE_ADMIN' && !this.state.order.orderClosed) ? {} : {display: 'none'}} >Удалити</th>
+                        <th className="user" style={(this.state.order.orderClosed || juser.role === 'ROLE_ADMIN' || juser.role === 'ROLE_SENIOR_USER') ? {display: 'none'} : {}} >Oпис</th>
+                        <th className="done" style={((juser.role === 'ROLE_ADMIN' || juser.role === 'ROLE_SENIOR_USER') && !this.state.order.orderClosed) ? {} : {display: 'none'}} >Удалити</th>
                     </tr>
                 </tbody>
                 <tbody>
@@ -718,6 +762,41 @@ class Order extends Component{
         
 
         );
+
+        const problemFieldInput = 
+            <div>
+                        
+                <label  className={"control-label label-2"}>
+                <ul id="redbutton">
+                    <li>
+                        <button disabled={!(this.state.order.problem.trim().length !== 0)}
+                            onClick={this.prepareEditDescription} >
+                            Сохранити
+                        </button>
+                    </li>
+                    <br/>
+                    <li>
+                        <button className={"btn-danger"}
+                            onClick={() => {window.location.reload(false)} } >
+                            Отмена
+                        </button>
+
+                    </li>
+                </ul>
+
+                </label>
+                <textarea 
+                    className=
+                        {this.state.order.problem.trim().length !== 0 ? "my-textarea" : "form-control my-input-field is-invalid"}
+                        // className={this.state.problem.isValid ? "form-control my-input-field" : "form-control my-input-field is-invalid"}
+                        type="text"
+                        id="problem"
+                        name="problem"
+                        value={this.state.order.problem}
+                        onChange={ (event) => this.editDescription(event)}
+                 />
+                <span className="form-text invalid-feedback">НЕ МОЖЕ БУТИ ПУСТИМ</span>
+            </div>
 
 
 
@@ -759,25 +838,48 @@ class Order extends Component{
                 <h4 className="date">Cyмма предоплати: {this.state.order.amountPayedInAdvance}</h4>
                 <h4 className="date">{this.state.order.orderClosed ? 'Оплачено:' : 'Довг:'} {this.state.order.amountToPay.toLocaleString(undefined, {maximumFractionDigits:2})}</h4>
 
-                <h4 className="date">Проблема: {this.state.order.problem}</h4>
+                <table border="0" >
+                    <tbody>
+                        <tr>
+                            
+                            <th className="price" > <h4 className="" >Проблема: </h4></th> 
+                            <th className="" >
+                            <h4 className="" align="left" onDoubleClick={this.setToEditDescription}>
+                                {this.state.editDescription
+                                ?
+                                problemFieldInput
+                                :
+                                this.state.order.problem}
+                            </h4>
+                            </th>
+                        </tr>
+                    </tbody>
+                </table>
 
-                <div style={(this.state.order.orderClosed) ? {display: 'none'} : {}}>
+                <div style={(this.state.order.payedFor) ? {display: 'none'} : {}}>
                     <hr/>
-                    <button className="btn btn-info my-button" onClick={() => this.addNewWork()}>Добавити роботу</button>
-                    <button className="btn btn-info my-button" onClick={() => this.addCarPart()}>Добавити запчасть</button> 
+                    <button className="btn btn-info my-button" 
+                    style={this.state.order.orderClosed ? {display: 'none'} : {}}
+                    onClick={() => this.addNewWork()}>Добавити роботу</button>
+                    <button className="btn btn-info my-button" 
+                    style={this.state.order.orderClosed ? {display: 'none'} : {}}
+                    onClick={() => this.addCarPart()}>Добавити запчасть</button> 
+                    
                     <button className="btn btn-info my-button" onClick={() => this.payFor()} style={
-                        this.state.order.payedFor ?
+                        !this.state.order.orderClosed ?
                          {display: 'none'} : 
                          ((juser.role === 'ROLE_ADMIN') ? {} : {display: 'none'})
                          }>Оплатити</button>
-                    <h4 className="btn btn-success my-button" style={this.state.order.payedFor ? {} : {display: 'none'}}>Оплачено</h4>
+
+                    
+                    
                     <button className="btn btn-info my-button" onClick={() => this.closeOrder()} style={
-                         ((juser.role === 'ROLE_ADMIN') ? {} : {display: 'none'})
+                         ((juser.role === 'ROLE_ADMIN'|| juser.role === 'ROLE_SENIOR_USER') && !this.state.order.orderClosed ? {} : {display: 'none'})
                          }>Закрити</button>
-                    <hr/>
+                    <h4 className="btn btn-success my-button" style={this.state.order.orderClosed ? {} : {display: 'none'}}>Закритий</h4>
                 </div>
 
-                <div style={this.state.order.orderClosed ? {} : {display: 'none'}}>
+                <div style={this.state.order.payedFor ? {} : {display: 'none'}}>
                     <hr/>
                     <button className="btn btn-success my-button" onClick={() => this.getReceipt()}>Щот за роботу</button>
                     <hr/>

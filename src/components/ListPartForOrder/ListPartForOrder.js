@@ -15,8 +15,10 @@ class ListPartForOrder extends Component{
                 <td className="name">{this.props.name}</td>
                 <td className="price">{this.props.amount}</td>
                 <td className="price">{this.props.totalPrice}</td>
-                <td className="desc" style={(this.props.closed || this.props.juser.role === 'ROLE_ADMIN') ? {display: 'none'} : {}}>{this.props.desc}</td>
-                <td className="done" style={(this.props.juser.role === 'ROLE_ADMIN' && !this.props.closed) ? {} : {display: 'none'}} > <button onClick={this.props.remove}>Удалити</button> </td>
+                <td className="desc" style={(this.props.closed || this.props.juser.role === 'ROLE_SENIOR_USER' || this.props.juser.role === 'ROLE_ADMIN' )
+                 ? {display: 'none'} : {}}>{this.props.desc}</td>
+                <td className="done" 
+                style={((this.props.juser.role === 'ROLE_ADMIN' || this.props.juser.role === 'ROLE_SENIOR_USER') && !this.props.closed) ? {} : {display: 'none'}} > <button onClick={this.props.remove}>Удалити</button> </td>
             </tr>
         )
     }

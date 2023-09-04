@@ -1,0 +1,45 @@
+.flex-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .suggestions {
+    border: 1px solid #999;
+    display: inline-block;
+    width: 60%;
+    border-top-width: 0;
+    list-style: none;
+    margin-top: 0;
+    padding-left: 0;
+  }
+  
+  .suggestions li {
+    padding: 0.5rem;
+  }
+  
+  .suggestion-active,
+  .suggestions li:hover {
+    text-align: left;
+    /* background-color: #dcdddd; */
+    /* color: #fae042; */
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .red-color{
+    background-color: #df8484;
+  }
+
+  .green-color{
+    background-color: #39a139;
+  }
+
+  .name{
+    width: 22%
+    
+  }
+
+  .field{
+      width: 78%
+      
+  }

@@ -26,11 +26,11 @@ class UserList extends Component{
 
         fileteredBy: '',
 
-        itemsToShow: 5,
+        itemsToShow: 10,
 
         beginIndex: 0,
 
-        endIndex: 5
+        endIndex: 10
     };
 
 
@@ -68,9 +68,11 @@ class UserList extends Component{
                     })
     }
 
-    reportOfUser = (id) =>{ 
-        //console.log('report ' + id);
-        this.props.history.push("/worksDoneBy/" + id);
+    reportOfUser = (id, userName) =>{ 
+        this.props.history.push({
+            pathname: "/worksDoneBy/" + id,
+            state: { name: userName }
+          })
     }
 
     sortMyList = (type) => {
@@ -259,8 +261,9 @@ class UserList extends Component{
                     edit={() => this.editUser(item.id)}
                     delete={() => this.deleteUser(item.id)}
                     select={() => this.selectUser(item.id)}
-                    report={() => this.reportOfUser(item.id)}
+                    report={() => this.reportOfUser(item.id, item.name)}
                     workId={this.props.match.params.id}
+                    forReport={false}
                   
                 />
             )

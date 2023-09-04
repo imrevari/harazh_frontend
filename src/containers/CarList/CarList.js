@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-import {Link} from 'react-router-dom';
 
 
 import ListCarComponent from '../../components/ListCar/ListCarComponent'
@@ -56,13 +55,14 @@ class CarList extends Component{
     }
 
     createOrder = (id) =>{ 
-        // console.log('creating order for ' + id);
-        this.props.history.push("/newOrder/0/" + id);
+        //console.log(this.props.match.params.cust);
+        const custId = (typeof(this.props.match.params.cust) === 'undefined') ? 0 : this.props.match.params.cust
+        this.props.history.push("/newOrder/" + custId + "/" + id);
     }
 
     allOrders = (id) =>{
         // console.log('orders of ' + id);
-        this.props.history.push("/openOrder/" + id + "/x");
+        this.props.history.push("/ordersOf/" + id + "/x");
     }
 
 
@@ -132,12 +132,22 @@ class CarList extends Component{
         const target = event.target;
 
         let value;
-        value = target.value;
+        value = target.value.toUpperCase();
 
         const updatableList = [...this.state.incoming];
 
-        const result = updatableList.filter((item) => item.vinCode.includes(value) ||
+        let result = updatableList.filter((item) => item.vinCode.includes(value) ||
          item.vinCode.toLowerCase().includes(value) || item.vinCode.toUpperCase().includes(value));
+
+        if(this.state.fileteredByLicense !== ''){
+            result = result.filter((item) => item.licencePlate.includes(this.state.fileteredByLicense) ||
+            item.licencePlate.toLowerCase().includes(this.state.fileteredByLicense) || item.licencePlate.toUpperCase().includes(this.state.fileteredByLicense));
+        }
+
+        if(this.state.fileteredByCarMade !== ''){
+            result = result.filter((item) => item.carMade.includes(this.state.fileteredByCarMade) ||
+         item.carMade.toLowerCase().includes(this.state.fileteredByCarMade) || item.carMade.toUpperCase().includes(this.state.fileteredByCarMade));
+        }
 
         const iToShow = [this.state.itemsToShow];
 
@@ -152,12 +162,24 @@ class CarList extends Component{
         const target = event.target;
 
         let value;
-        value = target.value;
+        value = target.value.toUpperCase();
 
         const updatableList = [...this.state.incoming];
 
-        const result = updatableList.filter((item) => item.carMade.includes(value) ||
+        let result = updatableList.filter((item) => item.carMade.includes(value) ||
          item.carMade.toLowerCase().includes(value) || item.carMade.toUpperCase().includes(value));
+
+        if(this.state.fileteredByLicense !== ''){
+            result = result.filter((item) => item.licencePlate.includes(this.state.fileteredByLicense) ||
+            item.licencePlate.toLowerCase().includes(this.state.fileteredByLicense) || item.licencePlate.toUpperCase().includes(this.state.fileteredByLicense));
+        }
+
+        if(this.state.fileteredByVin !== ''){
+            result = result.filter((item) => item.vinCode.includes(this.state.fileteredByVin) ||
+            item.vinCode.toLowerCase().includes(this.state.fileteredByVin) || item.vinCode.toUpperCase().includes(this.state.fileteredByVin))
+        }
+
+        
 
         const iToShow = [this.state.itemsToShow];
 
@@ -172,12 +194,22 @@ class CarList extends Component{
         const target = event.target;
 
         let value;
-        value = target.value;
+        value = target.value.toUpperCase();
 
         const updatableList = [...this.state.incoming];
 
-        const result = updatableList.filter((item) => item.licencePlate.includes(value) ||
+        let result = updatableList.filter((item) => item.licencePlate.includes(value) ||
          item.licencePlate.toLowerCase().includes(value) || item.licencePlate.toUpperCase().includes(value));
+
+        if(this.state.fileteredByCarMade !== ''){
+            result = result.filter((item) => item.carMade.includes(this.state.fileteredByCarMade) ||
+         item.carMade.toLowerCase().includes(this.state.fileteredByCarMade) || item.carMade.toUpperCase().includes(this.state.fileteredByCarMade));
+        }
+
+        if(this.state.fileteredByVin !== ''){
+            result = result.filter((item) => item.vinCode.includes(this.state.fileteredByVin) ||
+            item.vinCode.toLowerCase().includes(this.state.fileteredByVin) || item.vinCode.toUpperCase().includes(this.state.fileteredByVin))
+        }
 
         const iToShow = [this.state.itemsToShow];
 
@@ -292,17 +324,28 @@ class CarList extends Component{
             })
     };
 
-
-
-    componentDidMount(){
-
-        this.getCars();
-
+    createNewCar = () =>{
+        this.props.history.push({
+            pathname: "/addCar",
+            state: { 
+                newCarMade: this.state.fileteredByCarMade,
+                newCarLicense: this.state.fileteredByLicense,
+                newCarVin: this.state.fileteredByVin,
+                customer: this.props.match.params.cust
+            }
+          })
     }
 
 
 
-
+    componentDidMount(){
+        if(typeof(this.props.location.state) !== 'undefined'){
+            this.setState({incoming: this.props.location.state.cars,
+                sortedFilteredList: this.props.location.state.cars});
+        }else{
+            this.getCars();
+        }
+    }
 
     render() {
 
@@ -419,10 +462,12 @@ class CarList extends Component{
 
                     <br/>
                     <hr/>
-                    <div style={this.props.match.params.cust ? {display: 'none'} : {}} >
-                                <Link to="/addCar">
-                                    <button className="my-button">Свторити Машину</button>
-                                </Link>
+                    <div style={this.props.match.params.cust ? {display: 'none'} : {}} >      
+                        <button className="my-button" onClick={this.createNewCar}>Свторити Машину</button>     
+                    </div>
+
+                    <div style={this.props.match.params.cust ? {} : {display: 'none'}} >        
+                        <button className="my-button" onClick={this.createNewCar}>Свторити і добавити Машину</button>     
                     </div>
 
                 </div>

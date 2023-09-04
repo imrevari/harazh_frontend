@@ -14,7 +14,6 @@ class OrderList extends Component{
          
     }
 
-
     left = '<<<';
     right = '>>>'
 
@@ -88,8 +87,6 @@ class OrderList extends Component{
     }
 
     paginatorRight = () => {
-        
-
         const listSize = this.state.sortedFilteredList.length;
         const bIndex = [this.state.beginIndex];
         const eIndex = [this.state.endIndex];
@@ -268,8 +265,8 @@ class OrderList extends Component{
             });
     }               
     
-    getClosedOrdersbyCar = () =>{
-        axios.get('/orders/car/closed/' + this.props.match.params.car)
+    getAllOrdersbyCar = () =>{
+        axios.get('/orders/car/all/' + this.props.match.params.car)
                     .then((response) => {
                         // console.log(response.data)
                         this.setStateFromResponseForCar(response, true);
@@ -281,21 +278,8 @@ class OrderList extends Component{
                     })
     }
 
-    getOpenedOrdersbyCar = () =>{
-        axios.get('/orders/car/open/' + this.props.match.params.car)
-                    .then((response) => {
-                        // console.log(response.data)
-                        this.setStateFromResponseForCar(response, false);
-                    })
-                    .catch(error => {
-                        this.setState(() => {
-                            throw error;
-                        })
-                    })
-    }
-
-    getClosedOrdersbyCustomer = () =>{
-        axios.get('/orders/customer/closed/' + this.props.match.params.cust)
+    getAllOrdersbyCustomer = () =>{
+        axios.get('/orders/customer/all/' + this.props.match.params.cust)
                     .then((response) => {
                         // console.log(response.data)
                         this.setStateFromResponseForCustomer(response, true);
@@ -307,47 +291,14 @@ class OrderList extends Component{
                     })
     }
 
-    getOpenedOrdersbyCustomer = () =>{
-        axios.get('/orders/customer/open/' + this.props.match.params.cust)
-                    .then((response) => {
-                        // console.log(response.data)
-                        this.setStateFromResponseForCustomer(response, false);
-                    })
-                    .catch(error => {
-                        this.setState(() => {
-                            throw error;
-                        })
-                    })
-    }
-
-
-
-
-
     componentDidMount(){
-
-        if(this.props.match.params.state === 'open'){
-
-            if(this.props.match.params.car === 'x'){
-                // console.log('getting open order of cust ' + this.props.match.params.cust)
-                this.getOpenedOrdersbyCustomer();
-            }else{
-                // console.log('getting open order of car ' + this.props.match.params.car);
-                this.getOpenedOrdersbyCar();
-            }
-
-        }else if(this.props.match.params.state === 'closed'){
-
-            if(this.props.match.params.car === 'x'){
-                // console.log('getting closed order of cust ' + this.props.match.params.cust)
-                this.getClosedOrdersbyCustomer();
-            }else{
-                // console.log('getting closed order of car ' + this.props.match.params.car)
-                this.getClosedOrdersbyCar();
-            }
-
+        if(this.props.match.params.car === 'x'){
+            // console.log('getting closed order of cust ' + this.props.match.params.cust)
+            this.getAllOrdersbyCustomer();
+        }else{
+            // console.log('getting closed order of car ' + this.props.match.params.car)
+            this.getAllOrdersbyCar();
         }
-
     }
 
 
@@ -358,7 +309,6 @@ class OrderList extends Component{
         // const { detect } = require('detect-browser');
         // const browser = detect();
         // console.log(browser.name + ' ' + browser.version  + ' ' + browser.os + 'Android OS')
-
 
         const listOfOrders = this.state.sortedFilteredList.slice(this.state.beginIndex, this.state.endIndex).map( item => {
 
@@ -371,7 +321,9 @@ class OrderList extends Component{
                     details={() => this.openOrder(item.id)}
                     isClosed={this.state.closedOrders}
                     total={this.totalToPay(item.works, item.partCounts, item.amountPayedInAdvance)}
-                    
+                    car={item.car.carMade}
+                    customer={item.customer.firstName + ' ' + item.customer.lastName}
+                    showCustomer={this.props.match.params.car === 'x'}
                 />
             )
         });
@@ -382,10 +334,12 @@ class OrderList extends Component{
                     <thead>
                         <tr>
                             <th className=""  onClick={() => this.sortMyList('number')}>Номер &#8645;</th>
-                            <th className=""  >Одкритий </th>
-                            <th className="" onClick={() => this.sortMyList('close')} style={this.state.closedOrders ? {} : {display: 'none'} } >Закритий &#8645;</th>
-                            <th className=""  >{this.state.closedOrders ? 'Оплачено' : 'Довг' } </th>
-                            <th className="" >Деталi</th>
+                            <th className=""  >Відкритий </th>
+                            <th className="" onClick={() => this.sortMyList('close')}>Закритий &#8645;</th>
+                            <th className="" >
+                                {this.props.match.params.car === 'x' ? 'Авто' : 'Кліент'}
+                            </th>
+                            <th className="">{'Сумма'}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -399,7 +353,7 @@ class OrderList extends Component{
         return(
             <div>
                 
-                <h2> {this.props.match.params.state === 'open' ? "Одкритi" : "Закритi"}  закази {this.state.name}</h2>
+                <h2> Закази {this.state.name}</h2>
                 <hr/>
                 <br/>
 
@@ -425,7 +379,7 @@ class OrderList extends Component{
                             <div>
                                 <label
                                     className="control-label">
-                                    Одкритi мiж : </label>
+                                    Відкритi мiж : </label>
                                 <input
                                     className="form-control my-input-search-field-3" 
                                     name="from"

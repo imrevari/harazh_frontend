@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-
 import ShowCustomer from '../../components/Customer/ShowCustomer'
+import {RingLoader} from "react-spinners"
 
 class NewOrder extends Component{
 
@@ -15,33 +15,33 @@ class NewOrder extends Component{
     orderId = '';
 
     state = {
-        
-            customerIsPresent: false,
-            carIsPresent: false,
-            customer: {
-                id: '',
-                firstName: '',
-                lastName: '',
-                telNumber: '',
-                email:  ''
-            },
-            car: {
-                id: '',
-                vinCode: '',
-                licencePlate: '',
-                carMade: ''
-            },
-            amountPayedInAdvance: {
-                value: '',
-                isValid: true,
-                message: ''
-            },
-            problem: {
-                value: '',
-                isValid: true,
-                message: ''
-            }
-        
+        customerIsPresent: false,
+        carIsPresent: false,
+        customer: {
+            id: '',
+            firstName: '',
+            lastName: '',
+            telNumber: '',
+            email:  '',
+            listOfCars: []
+        },
+        car: {
+             id: '',
+            vinCode: '',
+            licencePlate: '',
+            carMade: ''
+        },
+        amountPayedInAdvance: {
+            value: '',
+            isValid: true,
+            message: ''
+        },
+        problem: {
+            value: '',
+            isValid: true,
+            message: ''
+        },
+        disabled: false  
     };
 
     newCustomer = () => {
@@ -70,8 +70,16 @@ class NewOrder extends Component{
     }
 
 
-
-
+    carsOfTheCustomr = () => {
+        // console.log(this.state.customer.id);
+        let id = this.state.customer.id === '' ? 0 : this.state.customer.id;
+        this.props.history.push({
+            pathname: "/carList/" + id,
+            state: {
+                cars: this.state.customer.listOfCars
+            }
+        })
+    }
 
 
     componentDidMount(){
@@ -92,8 +100,9 @@ class NewOrder extends Component{
     }
 
     getCustomerByParamId = () => {
-        axios.get('/' + this.props.match.params.cust)
+        axios.get('/cust_for_order/' + this.props.match.params.cust)
             .then((response) => {
+                // console.log(response)
                 const updatedProductForm = {
                     ...this.state.customer
                 };
@@ -174,7 +183,7 @@ class NewOrder extends Component{
 
     postDataHandler = (event) => {
         event.preventDefault();
-
+        this.setState({...this.state, disabled: true})
         const formData = {};
         formData.customer = this.state.customer.id;
         formData.car = this.state.car.id;
@@ -197,7 +206,8 @@ class NewOrder extends Component{
                         firstName: '',
                         lastName: '',
                         telNumber: '',
-                        email:  ''
+                        email:  '',
+                        listOfCars: []
                     },
                     car: {
                         id: '',
@@ -258,7 +268,7 @@ class NewOrder extends Component{
                
             }
 
-            this.setState({ ...this.state, problem: updatedCategoryForm});
+            this.setState({ ...this.state, problem: updatedCategoryForm, disabled: false});
         } else {
             this.setState({
                 ...this.state,
@@ -268,39 +278,32 @@ class NewOrder extends Component{
                         isValid: false,
                         message: 'Please don\'t mess with my input fields'
                     }
-                }
+                },
+                disabled: false
             })
         }
     };
 
-
-
-
-
-
-
-
     render() {
-
-        // console.log(this.state)
-
         return (
             <div className="container ">
                 <h2> {this.props.match.params.id != null ? "Змынити" : "Новий"} Заказ </h2>
                 <hr/>
                 <br/>
                 <form onSubmit={this.postDataHandler}>
-
-                    <div className="form-group try-border">
+                    <RingLoader  color={"red"} loading={this.state.disabled} size={150} />
+                    <div className="form-group try-border" >
                         <label
                             className={ "control-label label-for-buttons"}><h4>Клiент:</h4>
                             </label>
 
                             <button className={this.state.customerIsPresent ? "toHide" : "button-for-new-order"}
-                            onClick={this.newCustomer}>Створити</button>
+                            onClick={this.newCustomer}
+                            disabled={this.state.disabled}>Створити</button>
 
                             <button className={this.state.customerIsPresent ? "toHide" : "button-for-new-order"}
-                            onClick={this.customerFromList}>Добавити з списка</button>
+                            onClick={this.customerFromList}
+                            disabled={this.state.disabled}>Добавити з списка</button>
 
                             {this.state.customerIsPresent ? <ShowCustomer 
                             name={this.state.customer.firstName + ' ' + this.state.customer.lastName}/> : ""}
@@ -314,11 +317,20 @@ class NewOrder extends Component{
                             className={ "control-label label-for-buttons"}><h4>Машина:</h4>
                             </label>
 
-                            <button className={this.state.carIsPresent ? "toHide" : "button-for-new-order"}
-                            onClick={this.newCar}>Створити</button>
+                            <button className={this.state.carIsPresent ? "toHide" : 
+                            (this.state.customer.listOfCars.length > 0 ? "toHide" : "button-for-new-order")}
+                            onClick={this.newCar}
+                            disabled={this.state.disabled}>Створити</button>
 
                             <button className={this.state.carIsPresent ? "toHide" : "button-for-new-order"}
-                            onClick={this.carFromList}>Добавити з списка</button>
+                            onClick={this.carFromList}
+                            disabled={this.state.disabled}>Добавити з списка</button>
+
+                            <button 
+                                className=
+                                    {this.state.customer.listOfCars.length === 0 || this.state.carIsPresent ? "toHide" : "button-for-new-order"}
+                            onClick={this.carsOfTheCustomr}
+                            disabled={this.state.disabled}>Авто кліента</button>
 
                             {this.state.carIsPresent ? <ShowCustomer 
                             name={this.state.car.licencePlate}/> : ""}
@@ -334,6 +346,7 @@ class NewOrder extends Component{
                             className={this.state.amountPayedInAdvance.isValid ? "form-control my-input-field" : "form-control my-input-field is-invalid"}
                             id="amountPayedInAdvance"
                             name="amountPayedInAdvance"
+                            disabled={this.state.disabled}
                             type="number"
                             step="0.01"
                             min="0"
@@ -352,17 +365,17 @@ class NewOrder extends Component{
                             type="text"
                             id="problem"
                             name="problem"
+                            disabled={this.state.disabled}
                             value={this.state.problem.value}
                             onChange={this.inputChangeHandlerOfProblem}
                         />
                         <span className="form-text invalid-feedback">{this.state.problem.message}</span>
                     </div>
                     
-                    
                     <br/>
-                    <button className="btn btn-info my-button" type="submit" key="submit">Сохранити</button>
+                    <button className="btn btn-info my-button" type="submit" key="submit" disabled={this.state.disabled}>Сохранити</button>
 
-                    <button className=" btn btn-danger my-button" key='cancel' type="button" onClick={this.props.history.goBack}>Отмена</button>
+                    <button className=" btn btn-danger my-button" key='cancel' type="button" disabled={this.state.disabled} onClick={this.props.history.goBack}>Отмена</button>
 
                    
                 </form>
